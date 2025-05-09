@@ -1,0 +1,3 @@
+[submodule "third_party/deoxys_control"]
+	path = third_party/deoxys_control
+	url = https://github.com/Stanford-ILIAD/deoxys_control

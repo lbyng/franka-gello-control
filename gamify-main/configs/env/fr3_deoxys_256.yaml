@@ -1,0 +1,26 @@
+env: DeoxysFrankaEnv
+env_kwargs:
+  interface_cfg: "iliad_nuc.yml"
+  controller_type: "OSC_POSE"
+  control_hz: 15
+  img_width: 640
+  img_height: 480
+  resize_img_width: 256
+  resize_img_height: 256
+  horizon: 500
+  channels_first: True
+  depth: False
+  cameras:
+    agent:
+      camera_class: RealSenseCamera
+      camera_kwargs:
+        serial_number: "832112071449"
+    side:
+      camera_class: RealSenseCamera
+      camera_kwargs:
+        serial_number: "838212072814"
+    wrist:
+      camera_class: RealSenseCamera
+      camera_kwargs:
+        serial_number: "332322070159"
+  display_img: True

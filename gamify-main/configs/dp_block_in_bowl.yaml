@@ -1,0 +1,104 @@
+import:
+  - configs/env/fr3_deoxys_256.yaml
+
+alg: DiffusionPolicy
+alg_kwargs:
+  offline_steps: -1
+  random_steps: 0
+  noise_scheduler: ["import", "diffusers.schedulers.scheduling_ddim", "DDIMScheduler"]
+  noise_scheduler_kwargs:
+    num_train_timesteps: 100
+    beta_start: 0.0001
+    beta_end: 0.02
+    beta_schedule: squaredcos_cap_v2
+    clip_sample: True
+    set_alpha_to_one: True
+    steps_offset: 0
+    prediction_type: epsilon
+  num_inference_steps: 20
+  horizon: 16
+
+optim: AdamW
+optim_kwargs:
+  lr: 0.0001
+  betas:
+    - 0.95
+    - 0.999
+  eps: 1.0e-08
+  weight_decay: 1.0e-06
+
+network: ActorPolicy
+network_kwargs:
+  encoder_class: MultiEncoder
+  encoder_kwargs:
+    agent_image_class: RobomimicEncoder
+    agent_image_kwargs:
+     backbone: 18
+     feature_dim: 64
+     use_group_norm: True
+     num_kp: 64
+    # wrist_image_class: RobomimicEncoder
+    # wrist_image_kwargs:
+    #  backbone: 18
+    #  feature_dim: 64
+    #  use_group_norm: True
+    #  num_kp: 64
+    state__ee_pos_class: ["import", "torch.nn", "Identity"]
+    state__ee_quat_class: ["import", "torch.nn", "Identity"]
+    # state__gripper_pos_class: ["import", "torch.nn", "Identity"]
+
+  actor_class: ConditionalUnet1D
+  actor_kwargs:
+    diffusion_step_embed_dim: 128
+    down_dims: [256, 512, 1024]
+    kernel_size: 5
+    n_groups: 8
+
+dataset: ReplayBuffer
+dataset_kwargs:
+  path: /scr/suvir/gamify/data/block_in_bowl/accepted
+  sample_fn: sample
+  sample_kwargs:
+    batch_size: 64
+    seq: 16
+    pad: 8
+    seq_keys: ["action"]
+  epoch_ratio: 1.0
+  override_keys:
+  - ["action", "desired_action.action"]
+  include_keys: ['done', 'action', 'obs.agent_image', 'obs.state.ee_pos', 'obs.state.ee_quat', 'obs.state.gripper_pos']
+  exclude_keys: []
+  distributed: True
+
+schedule: cosine_with_linear_warmup
+schedule_kwargs:
+  warmup_steps: 2000
+  total_steps: 500000
+
+processor: Compose
+processor_kwargs:
+  processors:
+    -
+      - MinMaxActionNormalizer
+      - low: [-0.18, -0.08, -0.13, -0.32, -0.36, -0.53, -15]
+        high: [0.19, 0.18, 0.16, 0.24, 0.29, 0.43, 3]
+    -
+      - RandomCrop
+      -
+
+trainer_kwargs:
+  total_steps: 500000
+  log_freq: 100 # How often to log values
+  profile_freq: 100
+  checkpoint_freq: 50000
+  eval_freq: 1000000000 # How often to run evals
+  eval_during_train: False
+  eval_fn: eval_diffusion_policy
+  eval_kwargs:
+    horizon: 8
+  loss_metric: loss # The validation metric that determines when to save the "best_checkpoint"
+  max_validation_steps: 20 # Will run forever otherwise due to continuous replay buffer iter.
+  train_dataloader_kwargs:
+    num_workers: 4 # Number of dataloader workers.
+    batch_size: null
+    collate_fn: null

@@ -1,0 +1,58 @@
+<mujoco model="panda_scene">
+  <include file="bi-franka-with-modified-scene.xml"/>
+
+  <statistic center="0.3 0 0.4" extent="1"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="120" elevation="-20"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3"
+      markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+    <material name="table_mat" rgba="0.7 0.5 0.3 1"/>
+    <material name="divider_mat" rgba="0.2 0.2 0.2 1"/>
+    <material name="cube_mat" rgba="0.8 0.1 0.1 1"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+
+    <!-- Workbench -->
+    <!-- <body name="workbench" pos="0.7 0 0.96">
+      <geom name="table" type="box" size="0.4 0.3 0.02" pos="0 0 -0.02" material="table_mat"/>
+      <geom name="divider" type="box" size="0.005 0.3 0.02" pos="0 0 0.02" material="divider_mat"/>
+    </body> -->
+
+    <!-- Workbench -->
+
+    <!-- Workbench -->
+    <body name="workbench" pos="0.7 0 0.95">  
+        <geom name="table" type="box" size="0.4 0.6 0.03" pos="0 0 -0.02" material="table_mat"/>  <!-- Taller table -->
+        <geom name="divider" type="box" size="0.4 0.005 0.02" pos="0 0 0.03" material="divider_mat"/>  <!-- Divider along X-axis -->
+    </body>
+
+    <!-- Left Cube (placed on the left half of the workbench) -->
+    <body name="cube_left" pos="0.6 -0.25 0.98">
+        <geom name="cube_left_geom" type="box" size="0.025 0.025 0.025" material="cube_mat"/>
+        <joint name="cube_left_free" type="free"/>
+    </body>
+
+    <!-- Right Cube (placed on the right half of the workbench) -->
+    <body name="cube_right" pos="0.7 0.15 0.98">
+        <geom name="cube_right_geom" type="box" size="0.025 0.025 0.025" material="cube_mat"/>
+        <joint name="cube_right_free" type="free"/>
+    </body>
+
+<!-- <site name="target_site" type="sphere" size="0.02" rgba="1 0 0 1"/>
+<site name="current_pos_site" type="sphere" size="0.02" rgba="0 1 0 1"/>
+<site name="error_line" type="cylinder" size="0.001 0.5" rgba="1 1 0 0.5"/> -->
+
+
+  </worldbody>
+</mujoco>
